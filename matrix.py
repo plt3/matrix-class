@@ -59,7 +59,7 @@ class Mat:
         return visual.rstrip()
 
     def __add__(self, other):  # define matrix addition
-        if not self.samedimensions(other):  # raise error if matrice aren't same size
+        if not self.samedimensions(other):  # raise error if matrices aren't same size
             raise TypeError('The sum of these matrices is undefined.')
 
         endlist = []
@@ -72,12 +72,12 @@ class Mat:
 
             endlist.append(newrow)
 
-        object = Mat(endlist)
+        sum = Mat(endlist)
 
-        return object
+        return sum
 
     def __sub__(self, other):  # define matrix subtraction
-        if not self.samedimensions(other):  # raise error if matrice aren't same size
+        if not self.samedimensions(other):  # raise error if matrices aren't same size
             raise TypeError('The difference of these matrices is undefined.')
 
         endlist = []
@@ -90,9 +90,9 @@ class Mat:
 
             endlist.append(newrow)
 
-        object = Mat(endlist)
+        difference = Mat(endlist)
 
-        return object
+        return difference
 
     def __mul__(self, other):  # define matrix multiplication
         if isinstance(other, int):  # define scalar multiplication (only Mat * scalar)
@@ -101,7 +101,7 @@ class Mat:
         newother = other.transpose()
 
         for row, otherrow in zip(self.valuelist, newother.valuelist):
-            if len(row) != len(otherrow):  # raise error if product is undefined
+            if len(row) != len(otherrow):  # verify that rows of self are same length as columns of other
                 raise TypeError('The product of these matrices is undefined.')
 
         endlist = []
@@ -118,15 +118,17 @@ class Mat:
 
             endlist.append(endrow)
 
-        object = Mat(endlist)
+        product = Mat(endlist)
 
-        return object
+        return product
 
     @staticmethod
     def roundnums(rlist):  # round so that -0.0 is recognized as 0
+        roundingPrecision = 0.000000001
+
         for row in rlist:
             for index, entry in enumerate(row):
-                if abs(entry - round(entry)) < 0.000000001:  # arbitrary error margin
+                if abs(entry - round(entry)) < roundingPrecision:
                     row[index] = round(entry)
 
         return rlist
@@ -273,8 +275,8 @@ class Mat:
     def det(self):  # calculate determinant of matrix
         swaps, reduced = Mat.raw_ref(self.valuelist, True)  # get to REF to multiply entries on leading diagonal
 
-        if not self.issquare():  # det(a) = 0 if a is not square
-            return 0
+        if not self.issquare():  # det(a) undefined if a is not square
+            raise TypeError('Matrix is not square.')
 
         pivots = 1
         zerotest = 0
@@ -289,9 +291,11 @@ class Mat:
         if zerotest == len(reduced):  # meaning that there is a pivot in each row
             det = (-1) ** swaps * pivots  # make sure sign of determinant is correct
 
-            if abs(det - round(det, 1)) < 0.00000001:  # round for aesthetics
+            roundingPrecision = 0.000000001
+
+            if abs(det - round(det, 1)) < roundingPrecision:  # round for aesthetics
                 det = round(det, 1)
-            elif abs(det - round(det)) < 0.00000001:
+            elif abs(det - round(det)) < roundingPrecision:
                 det = round(det)
         else:
             det = 0  # if not invertible, determinant = 0
@@ -319,10 +323,7 @@ class Mat:
         return Mat(inversemat)
 
     def issquare(self):  # for use in self.det()
-        if len(self.valuelist) == len(self.valuelist[0]):
-            return True  # only True if number of columns = number of rows
-        else:
-            return False
+        return len(self.valuelist) == len(self.valuelist[0])  # only True if number of columns = number of rows
 
     def samedimensions(self, other):  # for use in self.__add__ and __sub__
         if len(self.valuelist) != len(other.valuelist):
@@ -387,9 +388,9 @@ class Mat:
                 except IndexError:  # if user tries to input non-rectangular matrix
                     print(f'Please enter {n} values per row.')
 
-        object = cls(fulllist)  # create Mat object from list
+        newMat = cls(fulllist)  # create Mat object from list
 
-        return object
+        return newMat
 
 
 # if run as a script, give a few examples of functionality
